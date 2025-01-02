@@ -129,12 +129,15 @@ def process_dag_file(filepath: str):
 def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict):
     table_data = []
     for filename, current_parse_time in current_parse_time_dict.items():
-        filename = filename.split("/")[-1]
         previous_parse_time = previous_parse_time_dict.get(filename, 0)
-        difference = current_parse_time - previous_parse_time
-        sign = "+" if difference > 0 else "-"
-        color = Fore.RED if difference > 0 else Fore.GREEN
-        difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
+        filename = filename.split("/")[-1]
+
+        difference_str = "0"
+        if previous_parse_time:
+            difference = round(current_parse_time - previous_parse_time, 4)
+            sign = "+" if difference > 0 else "-"
+            color = Fore.RED if difference > 0 else Fore.GREEN
+            difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
         table_data.append([filename, current_parse_time,
                           previous_parse_time, difference_str])
 
