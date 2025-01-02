@@ -7,7 +7,8 @@ import logging
 import os
 import sqlite3
 from datetime import datetime
-
+from colorama import Fore, Style, init
+from tabulate import tabulate
 
 from airflow.models.dag import DAG
 from airflow.utils import timezone
@@ -126,10 +127,21 @@ def process_dag_file(filepath: str):
 
 
 def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict):
+    table_data = []
     for filename, current_parse_time in current_parse_time_dict.items():
+        filename = filename.split("/")[-1]
         previous_parse_time = previous_parse_time_dict.get(filename, 0)
-        logging.info("Current parse time: %s, Previous parse time: %s, difference: %s, File: %s",
-                     current_parse_time, previous_parse_time, current_parse_time - previous_parse_time, filename)
+        difference = current_parse_time - previous_parse_time
+        sign = "+" if difference > 0 else "-"
+        color = Fore.RED if difference > 0 else Fore.GREEN
+        difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
+        table_data.append([filename, current_parse_time,
+                          previous_parse_time, difference_str])
+
+    headers = ["Filename", "Current Parse Time",
+               "Previous Parse Time", "Difference"]
+    table = tabulate(table_data, headers, tablefmt="grid")
+    print(table)
 
 
 if __name__ == "__main__":
