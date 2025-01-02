@@ -5,15 +5,71 @@ import argparse
 import sys
 import logging
 import os
+import sqlite3
+from datetime import datetime
+
 
 from airflow.models.dag import DAG
 from airflow.utils import timezone
 from airflow.utils.file import get_unique_dag_module_name
 
+DATABASE = 'benchmark_results.db'
+
+
+def initialize_database():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS benchmark_results (
+            id INTEGER PRIMARY KEY,
+            filename TEXT NOT NULL,
+            parse_time REAL NOT NULL,
+            execution_date TEXT NOT NULL,
+            file_content TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
+def get_file_content(filepath: str):
+    with open(filepath, 'r') as file:
+        return file.read()
+
+
+def check_previous_execution(filepath: str, file_content: str):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT file_content, parse_time FROM benchmark_results
+        WHERE filename = ?
+        ORDER BY execution_date DESC
+        LIMIT 1
+    ''', (filepath,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        previous_content = row[0]
+        return True, bool(previous_content == file_content), row[1]
+    return False, False, 0
+
+
+def save_benchmark_result(filepath: str, parse_time: float):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    file_content = get_file_content(filepath)
+    execution_date = datetime.now().isoformat()
+    cursor.execute('''
+        INSERT INTO benchmark_results (filename, parse_time, execution_date, file_content)
+        VALUES (?, ?, ?, ?)
+    ''', (filepath, parse_time, execution_date, file_content))
+    conn.commit()
+    conn.close()
+
 
 def parse(filepath: str):
     """
-    Simplified version of the Airflow parse method. 
+    Simplified version of the Airflow parse method.
     It loads the Python file as a module into memory.
     """
     try:
@@ -35,7 +91,7 @@ def parse(filepath: str):
 
 def process_modules(mods: list):
     """
-    Simplified version of the Airflow process_modules method. 
+    Simplified version of the Airflow process_modules method.
     It identifies the module DAGs and validates if it's a valid DAG instance.
     """
     top_level_dags = {
@@ -66,20 +122,29 @@ def process_dag_file(filepath: str):
     process_modules(mods)
 
     file_parse_end_dttm = timezone.utcnow()
+    return (file_parse_end_dttm - file_parse_start_dttm).total_seconds()
 
-    logging.info(
-        f'Time took to parse {file_parse_end_dttm - file_parse_start_dttm}')
+
+def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict):
+    for filename, current_parse_time in current_parse_time_dict.items():
+        previous_parse_time = previous_parse_time_dict.get(filename, 0)
+        logging.info("Current parse time: %s, Previous parse time: %s, difference: %s, File: %s",
+                     current_parse_time, previous_parse_time, current_parse_time - previous_parse_time, filename)
 
 
 if __name__ == "__main__":
+    initialize_database()
+
     parser = argparse.ArgumentParser(
         description="Measures the parsing time of an Airflow DAG.")
     parser.add_argument("--path", dest="path", type=str, required=True,
                         help="Path to the Python file containing the DAG or to the folder with the DAGs.")
     args = parser.parse_args()
+    current_parse_time_dict = {}
+    previous_parse_time_dict = {}
 
     if args.path.endswith(".py"):
-        process_dag_file(args.path)
+        python_files = [args.path]
     else:
         folder_files = os.listdir(args.path)
         python_files = list(
@@ -88,5 +153,21 @@ if __name__ == "__main__":
         logging.info(
             f"{len(python_files)} Python files identified on provided path.")
 
-        for filepath in python_files:
-            process_dag_file(filepath)
+    for filepath in python_files:
+        file_content = get_file_content(filepath)
+        is_previously_parsed, is_same_file_content, previous_parse_time = check_previous_execution(
+            filepath, file_content)
+
+        if is_same_file_content:
+            current_parse_time_dict[filepath] = previous_parse_time
+            previous_parse_time_dict[filepath] = previous_parse_time
+            continue
+        elif is_previously_parsed:
+            previous_parse_time_dict[filepath] = previous_parse_time
+
+        parse_time = process_dag_file(filepath)
+        current_parse_time_dict[filepath] = parse_time
+
+        save_benchmark_result(filepath, parse_time)
+
+    compare_results(current_parse_time_dict, previous_parse_time_dict)
