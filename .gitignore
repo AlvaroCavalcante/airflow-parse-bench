@@ -1,2 +1,4 @@
 airflow_parser
 .vscode
+__pycache__
+*.db
