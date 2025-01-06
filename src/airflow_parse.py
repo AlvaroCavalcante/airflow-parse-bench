@@ -5,67 +5,23 @@ import argparse
 import sys
 import logging
 import os
-import sqlite3
-from datetime import datetime
-from colorama import Fore, Style, init
+from colorama import Fore, Style
 from tabulate import tabulate
 
 from airflow.models.dag import DAG
 from airflow.utils import timezone
 from airflow.utils.file import get_unique_dag_module_name
 
-DATABASE = 'benchmark_results.db'
-
-
-def initialize_database():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS benchmark_results (
-            id INTEGER PRIMARY KEY,
-            filename TEXT NOT NULL,
-            parse_time REAL NOT NULL,
-            execution_date TEXT NOT NULL,
-            file_content TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+import bench_db_utils
 
 
 def get_file_content(filepath: str):
-    with open(filepath, 'r') as file:
-        return file.read()
-
-
-def check_previous_execution(filepath: str, file_content: str):
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT file_content, parse_time FROM benchmark_results
-        WHERE filename = ?
-        ORDER BY execution_date DESC
-        LIMIT 1
-    ''', (filepath,))
-    row = cursor.fetchone()
-    conn.close()
-    if row:
-        previous_content = row[0]
-        return True, bool(previous_content == file_content), row[1]
-    return False, False, 0
-
-
-def save_benchmark_result(filepath: str, parse_time: float):
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    file_content = get_file_content(filepath)
-    execution_date = datetime.now().isoformat()
-    cursor.execute('''
-        INSERT INTO benchmark_results (filename, parse_time, execution_date, file_content)
-        VALUES (?, ?, ?, ?)
-    ''', (filepath, parse_time, execution_date, file_content))
-    conn.commit()
-    conn.close()
+    try:
+        with open(filepath, 'r') as file:
+            return file.read()
+    except Exception as error:
+        logging.error(f"Failed to read the content of the file: {error}")
+        return None
 
 
 def parse(filepath: str):
@@ -148,7 +104,7 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
 
 
 if __name__ == "__main__":
-    initialize_database()
+    bench_db_utils.initialize_database()
 
     parser = argparse.ArgumentParser(
         description="Measures the parsing time of an Airflow DAG.")
@@ -170,7 +126,10 @@ if __name__ == "__main__":
 
     for filepath in python_files:
         file_content = get_file_content(filepath)
-        is_previously_parsed, is_same_file_content, previous_parse_time = check_previous_execution(
+        if not file_content:
+            continue
+
+        is_previously_parsed, is_same_file_content, previous_parse_time = bench_db_utils.check_previous_execution(
             filepath, file_content)
 
         if is_same_file_content:
@@ -183,6 +142,7 @@ if __name__ == "__main__":
         parse_time = process_dag_file(filepath)
         current_parse_time_dict[filepath] = parse_time
 
-        save_benchmark_result(filepath, parse_time)
+        bench_db_utils.save_benchmark_result(
+            filepath, parse_time, file_content)
 
     compare_results(current_parse_time_dict, previous_parse_time_dict)
