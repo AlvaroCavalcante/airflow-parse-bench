@@ -113,6 +113,8 @@ def get_python_modules(args):
         python_files = [args.path]
     else:
         folder_files = os.listdir(args.path)
+        folder_files = [os.path.join(args.path, file) for file in folder_files]
+
         python_files = list(
             filter(lambda file: file.endswith(".py"), folder_files))
 
