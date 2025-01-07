@@ -28,9 +28,8 @@ def check_previous_execution(filepath: str, file_content: str):
         SELECT file_content, parse_time FROM benchmark_results
         WHERE filename = ?
         ORDER BY execution_date DESC
-        LIMIT 1
     ''', (filepath,))
-    row = cursor.fetchone()
+    row = cursor.fetchall()
     conn.close()
     if row:
         previous_content = row[0]
