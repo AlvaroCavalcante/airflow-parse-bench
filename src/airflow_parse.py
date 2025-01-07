@@ -76,7 +76,11 @@ def process_dag_file(filepath: str):
         return
 
     mods = parse(filepath)
-    process_modules(mods)
+    found_dags = process_modules(mods)
+
+    if not found_dags:
+        logging.error(f"No valid DAGs found in {filepath}")
+        return 0
 
     file_parse_end_dttm = timezone.utcnow()
     return round((file_parse_end_dttm - file_parse_start_dttm).total_seconds(), 4)
@@ -149,6 +153,10 @@ if __name__ == "__main__":
             previous_parse_time_dict[filepath] = previous_parse_time
 
         parse_time = process_dag_file(filepath)
+
+        if not parse_time:
+            continue
+
         current_parse_time_dict[filepath] = parse_time
         best_parse_time = min(parse_time, best_parse_time)
         best_parse_time_dict[filepath] = best_parse_time
@@ -156,5 +164,6 @@ if __name__ == "__main__":
         bench_db_utils.save_benchmark_result(
             filepath, parse_time, file_content)
 
-    compare_results(current_parse_time_dict,
-                    previous_parse_time_dict, best_parse_time_dict)
+    if current_parse_time_dict:
+        compare_results(current_parse_time_dict,
+                        previous_parse_time_dict, best_parse_time_dict)
