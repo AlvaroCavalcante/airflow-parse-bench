@@ -86,7 +86,7 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
     table_data = []
     for filename, current_parse_time in current_parse_time_dict.items():
         previous_parse_time = previous_parse_time_dict.get(filename, 0)
-        filename = filename.split("/")[-1]
+        filename = os.path.basename(filename)
 
         difference_str = "0"
         if previous_parse_time:
@@ -103,6 +103,20 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
     print(table)
 
 
+def get_python_modules(args):
+    if args.path.endswith(".py"):
+        python_files = [args.path]
+    else:
+        folder_files = os.listdir(args.path)
+        python_files = list(
+            filter(lambda file: file.endswith(".py"), folder_files))
+
+        logging.info(
+            f"{len(python_files)} Python files identified on provided path.")
+
+    return python_files
+
+
 if __name__ == "__main__":
     bench_db_utils.initialize_database()
 
@@ -114,15 +128,7 @@ if __name__ == "__main__":
     current_parse_time_dict = {}
     previous_parse_time_dict = {}
 
-    if args.path.endswith(".py"):
-        python_files = [args.path]
-    else:
-        folder_files = os.listdir(args.path)
-        python_files = list(
-            filter(lambda file: file.endswith(".py"), folder_files))
-
-        logging.info(
-            f"{len(python_files)} Python files identified on provided path.")
+    python_files = get_python_modules(args)
 
     for filepath in python_files:
         file_content = get_file_content(filepath)
