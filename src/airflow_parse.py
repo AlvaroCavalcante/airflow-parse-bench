@@ -79,13 +79,14 @@ def process_dag_file(filepath: str):
     process_modules(mods)
 
     file_parse_end_dttm = timezone.utcnow()
-    return (file_parse_end_dttm - file_parse_start_dttm).total_seconds()
+    return round((file_parse_end_dttm - file_parse_start_dttm).total_seconds(), 4)
 
 
-def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict):
+def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict, best_parse_time_dict: dict):
     table_data = []
     for filename, current_parse_time in current_parse_time_dict.items():
         previous_parse_time = previous_parse_time_dict.get(filename, 0)
+        best_parse_time = best_parse_time_dict.get(filename, 0)
         filename = os.path.basename(filename)
 
         difference_str = "0"
@@ -95,10 +96,10 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
             color = Fore.RED if difference > 0 else Fore.GREEN
             difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
         table_data.append([filename, current_parse_time,
-                          previous_parse_time, difference_str])
+                          previous_parse_time, difference_str, best_parse_time])
 
     headers = ["Filename", "Current Parse Time",
-               "Previous Parse Time", "Difference"]
+               "Previous Parse Time", "Difference", "Best Parse Time"]
     table = tabulate(table_data, headers, tablefmt="grid")
     print(table)
 
@@ -127,6 +128,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     current_parse_time_dict = {}
     previous_parse_time_dict = {}
+    best_parse_time_dict = {}
 
     python_files = get_python_modules(args)
 
@@ -135,20 +137,24 @@ if __name__ == "__main__":
         if not file_content:
             continue
 
-        is_previously_parsed, is_same_file_content, previous_parse_time = bench_db_utils.check_previous_execution(
+        is_previously_parsed, is_same_file_content, previous_parse_time, best_parse_time = bench_db_utils.check_previous_execution(
             filepath, file_content)
 
         if is_same_file_content:
             current_parse_time_dict[filepath] = previous_parse_time
             previous_parse_time_dict[filepath] = previous_parse_time
+            best_parse_time_dict[filepath] = best_parse_time
             continue
         elif is_previously_parsed:
             previous_parse_time_dict[filepath] = previous_parse_time
 
         parse_time = process_dag_file(filepath)
         current_parse_time_dict[filepath] = parse_time
+        best_parse_time = min(parse_time, best_parse_time)
+        best_parse_time_dict[filepath] = best_parse_time
 
         bench_db_utils.save_benchmark_result(
             filepath, parse_time, file_content)
 
-    compare_results(current_parse_time_dict, previous_parse_time_dict)
+    compare_results(current_parse_time_dict,
+                    previous_parse_time_dict, best_parse_time_dict)

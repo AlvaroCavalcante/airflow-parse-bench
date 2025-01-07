@@ -32,9 +32,10 @@ def check_previous_execution(filepath: str, file_content: str):
     row = cursor.fetchall()
     conn.close()
     if row:
-        previous_content = row[0]
-        return True, bool(previous_content == file_content), row[1]
-    return False, False, 0
+        best_parse_time = min([r[1] for r in row])
+        previous_content = row[0][0]
+        return True, bool(previous_content == file_content), row[0][1], best_parse_time
+    return False, False, 0, 0
 
 
 def save_benchmark_result(filepath: str, parse_time: float, file_content: str):
