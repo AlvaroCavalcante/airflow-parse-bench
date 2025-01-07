@@ -5,12 +5,13 @@ import argparse
 import sys
 import logging
 import os
-from colorama import Fore, Style
-from tabulate import tabulate
 
 from airflow.models.dag import DAG
 from airflow.utils import timezone
 from airflow.utils.file import get_unique_dag_module_name
+from tqdm import tqdm
+from colorama import Fore, Style
+from tabulate import tabulate
 
 import bench_db_utils
 
@@ -138,7 +139,7 @@ if __name__ == "__main__":
 
     python_files = get_python_modules(args)
 
-    for filepath in python_files:
+    for filepath in tqdm(python_files, colour="green"):
         file_content = get_file_content(filepath)
         if not file_content:
             continue
