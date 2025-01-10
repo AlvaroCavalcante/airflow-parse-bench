@@ -1,5 +1,7 @@
 from datetime import datetime
+import os
 import sqlite3
+import logging
 
 
 DATABASE = 'benchmark_results.db'
@@ -19,6 +21,14 @@ def initialize_database():
     ''')
     conn.commit()
     conn.close()
+
+
+def reset_database():
+    if os.path.exists(DATABASE):
+        os.remove(DATABASE)
+        logging.info(f'{DATABASE} has been removed.')
+    initialize_database()
+    logging.info(f'{DATABASE} has been recreated.')
 
 
 def check_previous_execution(filepath: str, file_content: str):

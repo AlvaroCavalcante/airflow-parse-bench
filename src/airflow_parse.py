@@ -10,7 +10,7 @@ from airflow.models.dag import DAG
 from airflow.utils import timezone
 from airflow.utils.file import get_unique_dag_module_name
 from tqdm import tqdm
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 from tabulate import tabulate
 
 import bench_db_utils
@@ -137,7 +137,7 @@ def get_python_modules(args):
 
 
 if __name__ == "__main__":
-    bench_db_utils.initialize_database()
+    init(autoreset=True)
 
     parser = argparse.ArgumentParser(
         description="Measures the parsing time of an Airflow DAG.")
@@ -145,8 +145,15 @@ if __name__ == "__main__":
                         help="Path to the Python file containing the DAG or to the folder with the DAGs.")
     parser.add_argument("--order", dest="order", type=str, choices=['asc', 'desc'], default='asc',
                         help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
-
+    parser.add_argument("--reset-db", dest="reset_db", action="store_true",
+                        help="Reset the database before running the benchmark.")
     args = parser.parse_args()
+
+    if args.reset_db:
+        bench_db_utils.reset_database()
+    else:
+        bench_db_utils.initialize_database()
+
     current_parse_time_dict = {}
     previous_parse_time_dict = {}
     best_parse_time_dict = {}
