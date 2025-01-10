@@ -16,6 +16,12 @@ from tabulate import tabulate
 import bench_db_utils
 
 
+def add_dag_directory_to_sys_path(filepath: str):
+    dag_directory = os.path.dirname(filepath)
+    if dag_directory not in sys.path:
+        sys.path.append(dag_directory)
+
+
 def get_file_content(filepath: str):
     try:
         with open(filepath, 'r') as file:
@@ -70,6 +76,7 @@ def process_modules(mods: list):
 
 
 def process_dag_file(filepath: str):
+    add_dag_directory_to_sys_path(filepath)
     file_parse_start_dttm = timezone.utcnow()
 
     if filepath is None or not os.path.isfile(filepath):
@@ -97,9 +104,10 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
         difference_str = "0"
         if previous_parse_time:
             difference = round(current_parse_time - previous_parse_time, 4)
-            sign = "+" if difference > 0 else "-"
-            color = Fore.RED if difference > 0 else Fore.GREEN
-            difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
+            if difference > 0:
+                sign = "+" if difference > 0 else "-"
+                color = Fore.RED if difference > 0 else Fore.GREEN
+                difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
         table_data.append([filename, current_parse_time,
                           previous_parse_time, difference_str, best_parse_time])
 
