@@ -94,7 +94,7 @@ def process_dag_file(filepath: str):
     return round((file_parse_end_dttm - file_parse_start_dttm).total_seconds(), 4)
 
 
-def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict, best_parse_time_dict: dict):
+def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict, best_parse_time_dict: dict, order: str):
     table_data = []
     for filename, current_parse_time in current_parse_time_dict.items():
         previous_parse_time = previous_parse_time_dict.get(filename, 0)
@@ -111,6 +111,9 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
         table_data.append([filename, current_parse_time,
                           previous_parse_time, difference_str, best_parse_time])
 
+    reverse_order = True if order == 'desc' else False
+    table_data = sorted(
+        table_data, key=lambda data: data[1], reverse=reverse_order)
     headers = ["Filename", "Current Parse Time",
                "Previous Parse Time", "Difference", "Best Parse Time"]
     table = tabulate(table_data, headers, tablefmt="grid")
@@ -140,6 +143,9 @@ if __name__ == "__main__":
         description="Measures the parsing time of an Airflow DAG.")
     parser.add_argument("--path", dest="path", type=str, required=True,
                         help="Path to the Python file containing the DAG or to the folder with the DAGs.")
+    parser.add_argument("--order", dest="order", type=str, choices=['asc', 'desc'], default='asc',
+                        help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
+
     args = parser.parse_args()
     current_parse_time_dict = {}
     previous_parse_time_dict = {}
@@ -177,4 +183,4 @@ if __name__ == "__main__":
 
     if current_parse_time_dict:
         compare_results(current_parse_time_dict,
-                        previous_parse_time_dict, best_parse_time_dict)
+                        previous_parse_time_dict, best_parse_time_dict, args.order)
