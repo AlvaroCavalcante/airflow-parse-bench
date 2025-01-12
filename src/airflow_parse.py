@@ -136,7 +136,7 @@ def get_python_modules(args):
     return python_files
 
 
-if __name__ == "__main__":
+def main():
     init(autoreset=True)
 
     parser = argparse.ArgumentParser(
@@ -191,3 +191,7 @@ if __name__ == "__main__":
     if current_parse_time_dict:
         compare_results(current_parse_time_dict,
                         previous_parse_time_dict, best_parse_time_dict, args.order)
+
+
+if __name__ == "__main__":
+    main()

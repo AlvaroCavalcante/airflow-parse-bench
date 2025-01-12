@@ -16,7 +16,7 @@ long_description = read('README.md')
 
 setup(
     name='airflow-parse-bench',
-    version='0.0.1',
+    version='0.0.3',
     description='Test your Airflow Dags parse time.',
     url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     download_url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
@@ -38,6 +38,11 @@ setup(
         'benchmark',
         'benchmarking'
     ],
+    entry_points={
+        'console_scripts': [
+            'airflow-parse-bench=airflow_parse:main',
+        ],
+    },
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
