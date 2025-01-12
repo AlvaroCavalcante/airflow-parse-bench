@@ -2,3 +2,6 @@ airflow_parser
 .vscode
 __pycache__
 *.db
+build
+dist
+*.egg-info
