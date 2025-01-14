@@ -104,7 +104,7 @@ def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dic
         difference_str = "0"
         if previous_parse_time:
             difference = round(current_parse_time - previous_parse_time, 4)
-            if difference > 0:
+            if difference != 0:
                 sign = "+" if difference > 0 else "-"
                 color = Fore.RED if difference > 0 else Fore.GREEN
                 difference_str = f'{color}{sign}{abs(difference)} seconds{Style.RESET_ALL}'
@@ -147,6 +147,8 @@ def main():
                         help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
     parser.add_argument("--reset-db", dest="reset_db", action="store_true",
                         help="Reset the database before running the benchmark.")
+    parser.add_argument("--skip-unchanged", dest="skip_unchanged", action="store_true",
+                        help="Skip parsing files that have not changed.")
     args = parser.parse_args()
 
     if args.reset_db:
@@ -168,7 +170,7 @@ def main():
         is_previously_parsed, is_same_file_content, previous_parse_time, best_parse_time = bench_db_utils.check_previous_execution(
             filepath, file_content)
 
-        if is_same_file_content:
+        if args.skip_unchanged and is_same_file_content:
             current_parse_time_dict[filepath] = previous_parse_time
             previous_parse_time_dict[filepath] = previous_parse_time
             best_parse_time_dict[filepath] = best_parse_time
