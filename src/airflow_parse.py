@@ -1,25 +1,13 @@
-import importlib
-import importlib.machinery
-import importlib.util
 import argparse
-import sys
 import logging
 import os
+import subprocess
 
-from airflow.models.dag import DAG
-from airflow.utils import timezone
-from airflow.utils.file import get_unique_dag_module_name
 from tqdm import tqdm
 from colorama import Fore, Style, init
 from tabulate import tabulate
 
 import bench_db_utils
-
-
-def add_dag_directory_to_sys_path(filepath: str):
-    dag_directory = os.path.dirname(filepath)
-    if dag_directory not in sys.path:
-        sys.path.append(dag_directory)
 
 
 def get_file_content(filepath: str):
@@ -29,69 +17,6 @@ def get_file_content(filepath: str):
     except Exception as error:
         logging.error(f"Failed to read the content of the file: {error}")
         return None
-
-
-def parse(filepath: str):
-    """
-    Simplified version of the Airflow parse method.
-    It loads the Python file as a module into memory.
-    """
-    try:
-        mod_name = get_unique_dag_module_name(filepath)
-
-        if mod_name in sys.modules:
-            del sys.modules[mod_name]
-
-        loader = importlib.machinery.SourceFileLoader(mod_name, filepath)
-        spec = importlib.util.spec_from_loader(mod_name, loader)
-        new_module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = new_module
-        loader.exec_module(new_module)
-        return [new_module]
-    except Exception as e:
-        logging.error(f"Failed to parse {filepath}, error: {e}")
-        return []
-
-
-def process_modules(mods: list):
-    """
-    Simplified version of the Airflow process_modules method.
-    It identifies the module DAGs and validates if it's a valid DAG instance.
-    """
-    top_level_dags = {
-        (o, m) for m in mods for o in m.__dict__.values() if isinstance(o, DAG)}
-
-    found_dags = []
-
-    for dag, mod in top_level_dags:
-        dag.fileloc = mod.__file__
-        try:
-            dag.validate()
-        except Exception as error:
-            logging.error(f"Error to validate DAG: {error}")
-        else:
-            found_dags.append(dag)
-
-    return found_dags
-
-
-def process_dag_file(filepath: str):
-    add_dag_directory_to_sys_path(filepath)
-    file_parse_start_dttm = timezone.utcnow()
-
-    if filepath is None or not os.path.isfile(filepath):
-        logging.error(f"Error: incorrect or invalid file path: {filepath}")
-        return
-
-    mods = parse(filepath)
-    found_dags = process_modules(mods)
-
-    if not found_dags:
-        logging.error(f"No valid DAGs found in {filepath}")
-        return 0
-
-    file_parse_end_dttm = timezone.utcnow()
-    return round((file_parse_end_dttm - file_parse_start_dttm).total_seconds(), 4)
 
 
 def compare_results(current_parse_time_dict: dict, previous_parse_time_dict: dict, best_parse_time_dict: dict, order: str):
@@ -136,6 +61,18 @@ def get_python_modules(args):
     return python_files
 
 
+def run_dag_parse(filepath: str, num_iterations: int):
+    parse_times = []
+    for _ in range(num_iterations):
+        python_result = subprocess.run(
+            ['python3', 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
+        parse_time = float(python_result.stdout.strip())
+        parse_times.append(parse_time)
+
+    parse_time = round(sum(parse_times) / len(parse_times), 3)
+    return parse_time
+
+
 def main():
     init(autoreset=True)
 
@@ -146,9 +83,11 @@ def main():
     parser.add_argument("--order", dest="order", type=str, choices=['asc', 'desc'], default='asc',
                         help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
     parser.add_argument("--reset-db", dest="reset_db", action="store_true",
-                        help="Reset the database before running the benchmark.")
+                        help="Reset the database before running the benchmarking.")
     parser.add_argument("--skip-unchanged", dest="skip_unchanged", action="store_true",
                         help="Skip parsing files that have not changed.")
+    parser.add_argument("--num-iterations", dest="num_iterations", type=int, default=1,
+                        help="Number of times to execute each DAG parse. The parse time is the average of all iterations.")
     args = parser.parse_args()
 
     if args.reset_db:
@@ -178,7 +117,7 @@ def main():
         elif is_previously_parsed:
             previous_parse_time_dict[filepath] = previous_parse_time
 
-        parse_time = process_dag_file(filepath)
+        parse_time = run_dag_parse(filepath, args.num_iterations)
 
         if not parse_time:
             continue
