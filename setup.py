@@ -16,15 +16,15 @@ long_description = read('README.md')
 
 setup(
     name='airflow-parse-bench',
-    version='0.0.3',
-    description='Test your Airflow Dags parse time.',
+    version='0.1.0',
+    description='Measure and compare your Airflow Dags parse time easily.',
     url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     download_url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     license='Apache License 2.0',
     author='Alvaro Leandro Cavalcante Carneiro',
     author_email='alvaroleandro250@gmail.com',
 
-    py_modules=['airflow_parse', 'bench_db_utils'],
+    py_modules=['airflow_parse', 'bench_db_utils', 'dag_parse'],
     package_dir={'': 'src'},
 
     long_description=long_description,
