@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import sys
 import subprocess
 
 from tqdm import tqdm
@@ -64,8 +65,10 @@ def get_python_modules(args):
 def run_dag_parse(filepath: str, num_iterations: int):
     parse_times = []
     for _ in range(num_iterations):
+        python_command = sys.executable
+
         python_result = subprocess.run(
-            ['python', 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
+            [python_command, 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
 
         if python_result.returncode != 0:
             logging.error(
