@@ -65,7 +65,13 @@ def run_dag_parse(filepath: str, num_iterations: int):
     parse_times = []
     for _ in range(num_iterations):
         python_result = subprocess.run(
-            ['python3', 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
+            ['python', 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
+
+        if python_result.returncode != 0:
+            logging.error(
+                f"Failed to parse {filepath}, error: {python_result.stderr}")
+            return None
+
         parse_time = float(python_result.stdout.strip())
         parse_times.append(parse_time)
 
@@ -132,6 +138,8 @@ def main():
     if current_parse_time_dict:
         compare_results(current_parse_time_dict,
                         previous_parse_time_dict, best_parse_time_dict, args.order)
+    else:
+        logging.warning("No valid DAGs were found, finishing process.")
 
 
 if __name__ == "__main__":
