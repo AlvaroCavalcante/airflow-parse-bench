@@ -73,7 +73,7 @@ def run_dag_parse(filepath: str, num_iterations: int):
         if python_result.returncode != 0:
             logging.error(
                 f"Failed to parse {filepath}, error: {python_result.stderr}")
-            return None
+            continue
 
         parse_time = float(python_result.stdout.strip())
         parse_times.append(parse_time)
