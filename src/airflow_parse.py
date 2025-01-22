@@ -104,19 +104,7 @@ def main():
     configure_logger()
     init(autoreset=True)
 
-    parser = argparse.ArgumentParser(
-        description="Measures the parsing time of an Airflow DAG.")
-    parser.add_argument("--path", dest="path", type=str, required=True,
-                        help="Path to the Python file containing the DAG or to the folder with the DAGs.")
-    parser.add_argument("--order", dest="order", type=str, choices=['asc', 'desc'], default='asc',
-                        help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
-    parser.add_argument("--reset-db", dest="reset_db", action="store_true",
-                        help="Reset the database before running the benchmarking.")
-    parser.add_argument("--skip-unchanged", dest="skip_unchanged", action="store_true",
-                        help="Skip parsing files that have not changed.")
-    parser.add_argument("--num-iterations", dest="num_iterations", type=int, default=1,
-                        help="Number of times to execute each DAG parse. The parse time is the average of all iterations.")
-    args = parser.parse_args()
+    args = define_arguments()
 
     if args.reset_db:
         bench_db_utils.reset_database()
@@ -162,6 +150,23 @@ def main():
                         previous_parse_time_dict, best_parse_time_dict, args.order)
     else:
         logging.warning("No valid DAGs were found, finishing process.")
+
+
+def define_arguments():
+    parser = argparse.ArgumentParser(
+        description="Measures the parsing time of an Airflow DAG.")
+    parser.add_argument("--path", dest="path", type=str, required=True,
+                        help="Path to the Python file containing the DAG or to the folder with the DAGs.")
+    parser.add_argument("--order", dest="order", type=str, choices=['asc', 'desc'], default='asc',
+                        help="Order to display the results: 'asc' for ascending, 'desc' for descending.")
+    parser.add_argument("--reset-db", dest="reset_db", action="store_true",
+                        help="Reset the database before running the benchmarking.")
+    parser.add_argument("--skip-unchanged", dest="skip_unchanged", action="store_true",
+                        help="Skip parsing files that have not changed.")
+    parser.add_argument("--num-iterations", dest="num_iterations", type=int, default=1,
+                        help="Number of times to execute each DAG parse. The parse time is the average of all iterations.")
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":
