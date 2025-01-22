@@ -37,7 +37,13 @@ def parse(filepath: str):
     except Exception as e:
         logging.error(
             f"Failed to parse {os.path.basename(filepath)}, error: {e}")
+        exit_subprocess_execution()
         return []
+
+
+def exit_subprocess_execution():
+    if __name__ == "__main__":
+        sys.exit(1)
 
 
 def process_modules(mods: list):
@@ -69,6 +75,7 @@ def process_dag_file(filepath: str):
 
         if filepath is None or not os.path.isfile(filepath):
             logging.error(f"Error: incorrect or invalid file path: {filepath}")
+            exit_subprocess_execution()
             return 0
 
         mods = parse(filepath)
@@ -81,6 +88,7 @@ def process_dag_file(filepath: str):
         if not found_dags:
             logging.error(
                 f"No valid DAGs found in {os.path.basename(filepath)}")
+            exit_subprocess_execution()
             return 0
 
         file_parse_end_dttm = timezone.utcnow()
@@ -88,6 +96,7 @@ def process_dag_file(filepath: str):
     except Exception as error:
         logging.error(
             f"Failed to process {os.path.basename(filepath)}, error: {error}")
+        exit_subprocess_execution()
         return 0
 
 

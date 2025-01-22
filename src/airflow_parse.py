@@ -89,14 +89,14 @@ def get_average_parse_time(filepath: str, num_iterations: int):
             [python_command, 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
 
         if python_result.returncode != 0:
-            logging.error(
-                f"Failed to parse {filepath}, error: {python_result.stderr}")
-            continue
+            logging.error(python_result.stdout)
+            break
 
         parse_time = float(python_result.stdout.strip().split()[-1])
         parse_times.append(parse_time)
 
-    parse_time = round(sum(parse_times) / len(parse_times), 3)
+    parse_time = round(sum(parse_times) / len(parse_times),
+                       3) if parse_times else 0
     return parse_time
 
 
