@@ -35,7 +35,8 @@ def parse(filepath: str):
         loader.exec_module(new_module)
         return [new_module]
     except Exception as e:
-        logging.error(f"Failed to parse {filepath}, error: {e}")
+        logging.error(
+            f"Failed to parse {os.path.basename(filepath)}, error: {e}")
         return []
 
 
@@ -68,20 +69,26 @@ def process_dag_file(filepath: str):
 
         if filepath is None or not os.path.isfile(filepath):
             logging.error(f"Error: incorrect or invalid file path: {filepath}")
-            return 999999
+            return 0
 
         mods = parse(filepath)
+
+        if not mods:
+            return 0
+
         found_dags = process_modules(mods)
 
         if not found_dags:
-            logging.error(f"No valid DAGs found in {filepath}")
-            return 999999
+            logging.error(
+                f"No valid DAGs found in {os.path.basename(filepath)}")
+            return 0
 
         file_parse_end_dttm = timezone.utcnow()
         return round((file_parse_end_dttm - file_parse_start_dttm).total_seconds(), 3)
     except Exception as error:
-        logging.error(f"Failed to process {filepath}, error: {error}")
-        return 999999
+        logging.error(
+            f"Failed to process {os.path.basename(filepath)}, error: {error}")
+        return 0
 
 
 if __name__ == "__main__":
