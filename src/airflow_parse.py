@@ -9,6 +9,7 @@ from colorama import Fore, Style, init
 from tabulate import tabulate
 
 import bench_db_utils
+import dag_parse
 
 
 def get_file_content(filepath: str):
@@ -63,10 +64,19 @@ def get_python_modules(args):
 
 
 def run_dag_parse(filepath: str, num_iterations: int):
-    parse_times = []
-    for _ in range(num_iterations):
-        python_command = sys.executable
+    if num_iterations > 1:
+        parse_time = get_average_parse_time(filepath, num_iterations)
+    else:
+        parse_time = dag_parse.process_dag_file(filepath)
 
+    return parse_time
+
+
+def get_average_parse_time(filepath: str, num_iterations: int):
+    parse_times = []
+    python_command = sys.executable
+
+    for _ in range(num_iterations):
         python_result = subprocess.run(
             [python_command, 'src/dag_parse.py', '--filepath', filepath], capture_output=True, text=True)
 
