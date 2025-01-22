@@ -85,7 +85,7 @@ def get_average_parse_time(filepath: str, num_iterations: int):
                 f"Failed to parse {filepath}, error: {python_result.stderr}")
             continue
 
-        parse_time = float(python_result.stdout.strip())
+        parse_time = float(python_result.stdout.strip().split()[-1])
         parse_times.append(parse_time)
 
     parse_time = round(sum(parse_times) / len(parse_times), 3)
