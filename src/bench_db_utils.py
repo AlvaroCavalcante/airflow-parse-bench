@@ -26,9 +26,8 @@ def initialize_database():
 def reset_database():
     if os.path.exists(DATABASE):
         os.remove(DATABASE)
-        logging.info(f'{DATABASE} has been removed.')
     initialize_database()
-    logging.info(f'{DATABASE} has been recreated.')
+    logging.info('Database reset successfully.')
 
 
 def check_previous_execution(filepath: str, file_content: str):

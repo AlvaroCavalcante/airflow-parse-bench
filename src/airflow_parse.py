@@ -12,12 +12,20 @@ import bench_db_utils
 import dag_parse
 
 
+def configure_logger():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+
 def get_file_content(filepath: str):
     try:
         with open(filepath, 'r') as file:
             return file.read()
     except Exception as error:
-        logging.error(f"Failed to read the content of the file: {error}")
+        logging.error(f"Failed to read the file content: {error}")
         return None
 
 
@@ -93,6 +101,7 @@ def get_average_parse_time(filepath: str, num_iterations: int):
 
 
 def main():
+    configure_logger()
     init(autoreset=True)
 
     parser = argparse.ArgumentParser(
