@@ -59,7 +59,7 @@ setup(
     python_requires='>=3.8',
     install_requires=[
         'apache-airflow==2.10.4',
-        'apache-airflow-providers-apache-beam==5.9.1',
+        'apache-airflow-providers-apache-beam==6.0.0',
         'apache-airflow-providers-common-compat==1.2.2',
         'apache-airflow-providers-common-io==1.4.2',
         'apache-airflow-providers-common-sql==1.20.0',
