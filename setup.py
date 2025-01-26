@@ -16,8 +16,8 @@ long_description = read('README.md')
 
 setup(
     name='airflow-parse-bench',
-    version='0.2.0',
-    description='Measure and compare your Airflow Dags parse time easily.',
+    version='1.0.0',
+    description='Easily measure and compare your Airflow DAGs` parse time.',
     url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     download_url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     license='Apache License 2.0',
@@ -36,6 +36,9 @@ setup(
         'dag',
         'parse',
         'benchmark',
+        'apache',
+        'data',
+        'data-engineering',
         'benchmarking'
     ],
     entry_points={
@@ -53,7 +56,8 @@ setup(
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: Apache Software License',
         'Topic :: System :: Benchmark',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Framework :: Apache Airflow',
     ],
 
     python_requires='>=3.8',
