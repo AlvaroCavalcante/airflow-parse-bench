@@ -66,7 +66,7 @@ setup(
         'apache-airflow-providers-apache-beam==5.9.1',
         'apache-airflow-providers-common-compat==1.2.2',
         'apache-airflow-providers-common-io==1.4.2',
-        'apache-airflow-providers-common-sql==1.20.0',
+        'apache-airflow-providers-common-sql==1.21.0',
         'apache-airflow-providers-sqlite==3.9.0',
         'apache-airflow-providers-standard==0.0.2',
         'apache-airflow-providers-google==10.26.0',
