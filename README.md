@@ -1,6 +1,6 @@
 # Airflow Dag Parse Benchmarking
 
-A Python tool to parse Airflow DAGs and measure the time taken to parse them.
+Stop creating bad DAGs! Use this tool to measure and compare the parse time of your DAGs, identify bottlenecks, and optimize your Airflow environment for better performance.
 
 # How It Works
 
@@ -71,5 +71,18 @@ It will display the following options:
 > **Note**: If you encounter an error to parse the Python file, or if there's no valid DAGs in your file, you'll see an error message in the output and the file won't be listed in the table results.  
 
 # Roadmap
+This project is still in its early stages, and there are many improvements planned for the future. Some of the features we're considering include:
+
+- **Parse DAGs on Cloud:** Automatically download DAGs from a cloud provider (e.g., AWS S3, Google Cloud Storage) and parse them.
+- **Paralelize parse execution:** Parse multiple DAGs at the same time to speed up the process.
+- **Consider .airflowignore:** Ignore files and directories specified in the .airflowignore file.
+
+If you want to request a new feature or report a bug, please open a new issue!
 
 # Contributing
+This project is open to contributions! If you want to help us improve the tool, please follow these steps:
+
+- Open a new issue to discuss the feature or bug you want to address.
+- Once approved, fork the repository and create a new branch.
+- Implement the changes.
+- Create a pull request with a detailed description of the changes.
