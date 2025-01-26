@@ -16,8 +16,8 @@ long_description = read('README.md')
 
 setup(
     name='airflow-parse-bench',
-    version='1.0.0',
-    description='Easily measure and compare your Airflow DAGs` parse time.',
+    version='1.0.1',
+    description='Easily measure and compare your Airflow DAGs' parse time.',
     url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     download_url='https://github.com/AlvaroCavalcante/airflow-parse-bench',
     license='Apache License 2.0',
