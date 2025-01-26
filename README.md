@@ -2,26 +2,34 @@
 
 Stop creating bad DAGs! Use this tool to measure and compare the parse time of your DAGs, identify bottlenecks, and optimize your Airflow environment for better performance.
 
-# How It Works
+# Contents
 
+- [How it works](#how)
+- [Installation](#installation)
+    - [Install your Airflow dependencies](#install-dependencies)
+    - [Configure your Airflow Variables](#configure-variables)
+- [Usage](#usage)
+- [Roadmap](#roadmap)
+- [Contribute](#contribute)
+
+# How It Works <a id="how"></a>
 While retrieving parse metrics from an Airflow cluster is straightforward, measuring the effectiveness of your code optimizations can be less so. Every time you modify your code, you need to redeploy the updated Python file to your cloud provider, wait for the DAG to be parsed, and then extract a new report - a slow and time-consuming process.
 
 To address this challenge, this tool simplifies measuring and comparing the parse times of your DAGs. It uses the same parse method as Airflow (taken from the Airflow repository), measures the time taken to parse the DAGs, and stores the results for further comparisons.
 
-
-# Installation
+# Installation <a id="installation"></a>
 It's recommended to use a [virtualenv](https://docs.python.org/3/library/venv.html) to avoid library conflicts. Once set up, you can install the package by running the following command:
 
 ```bash
 pip install airflow-parse-bench
 ```
 
-## Install your Airflow dependencies
+## Install your Airflow dependencies <a id="install-dependencies"></a>
 The command above only installs the essential library dependencies (related to Airflow and Airflow providers). You must manually install any additional libraries your DAGs depend on.
 
 For example, if a DAG uses ```boto3``` to interact with AWS, ensure that boto3 is installed in your environment. Otherwise, you'll encounter parse errors.
 
-## Configure your Airflow Variables
+## Configure your Airflow Variables <a id="configure-variables"></a>
 Finally, if your DAGs use **Airflow Variables**, you must define them locally as well. Use placeholder values, as the actual values aren't required for parsing purposes. To setup Airflow Variables locally, you can use the following command:
 
 ```bash
@@ -32,7 +40,7 @@ Without this, you'll encounter an error like:
 error: 'Variable MY_VARIABLE does not exist'
 ```
 
-# Usage
+# Usage <a id="usage"></a>
 To measure the parse time of a single Python file, just run:
 
 ```bash
@@ -70,7 +78,7 @@ It will display the following options:
 
 > **Note**: If you encounter an error to parse the Python file, or if there's no valid DAGs in your file, you'll see an error message in the output and the file won't be listed in the table results.  
 
-# Roadmap
+# Roadmap <a id="roadmap"></a>
 This project is still in its early stages, and there are many improvements planned for the future. Some of the features we're considering include:
 
 - **Parse DAGs on Cloud:** Automatically download DAGs from a cloud provider (e.g., AWS S3, Google Cloud Storage) and parse them.
@@ -79,7 +87,7 @@ This project is still in its early stages, and there are many improvements plann
 
 If you want to request a new feature or report a bug, please open a new issue!
 
-# Contributing
+# Contributing <a id="contribute"></a>
 This project is open to contributions! If you want to help us improve the tool, please follow these steps:
 
 - Open a new issue to discuss the feature or bug you want to address.
