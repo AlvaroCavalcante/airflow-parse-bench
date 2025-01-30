@@ -10,6 +10,7 @@ Use this tool to measure and compare the parse time of your DAGs, identify bottl
 - [Installation](#installation)
     - [Install your Airflow dependencies](#install-dependencies)
     - [Configure your Airflow Variables](#configure-variables)
+    - [Init the Airflow database](#init-db)
 - [Usage](#usage)
     - [Additional Options](#options)
 - [Roadmap](#roadmap)
@@ -31,6 +32,12 @@ pip install airflow-parse-bench
 The command above installs only the essential library dependencies (Airflow and Airflow providers). You’ll need to manually install any additional libraries that your DAGs depend on.
 
 For example, if a DAG uses ```boto3``` to interact with AWS, ensure that boto3 is installed in your environment. Otherwise, you'll encounter parse errors.
+
+## Init the Airflow database <a id="init-db"></a>
+Before parsing your DAGs, it's also necessary to start an Airflow database on your local machine. To do this, run the command below:
+```
+airflow db init
+```
 
 ## Configure your Airflow Variables <a id="configure-variables"></a>
 If your DAGs use **Airflow Variables**, you must define them locally as well. Use placeholder values, as the actual values aren't required for parsing purposes. 
