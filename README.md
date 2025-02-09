@@ -21,6 +21,8 @@ Retrieving parse metrics from an Airflow cluster is straightforward, but measuri
 
 This tool simplifies the process of measuring and comparing DAG parse times. It uses the same parse method as Airflow (from the Airflow repository) to measure the time taken to parse your DAGs locally, storing results for future comparisons.
 
+To know more about how the tool works, check out the [Medium article](https://medium.com/towards-data-science/stop-creating-bad-dags-optimize-your-airflow-environment-by-improving-your-python-code-146fcf4d27f7).
+
 # Installation <a id="installation"></a>
 It's recommended to use a [virtualenv](https://docs.python.org/3/library/venv.html) to avoid library conflicts. Once set up, you can install the package by running the following command:
 
@@ -97,6 +99,7 @@ It will display the following options:
 This project is still in its early stages, and there are many improvements planned for the future. Some of the features we're considering include:
 
 - **Cloud DAG Parsing:** Automatically download and parse DAGs from cloud providers like AWS S3 or Google Cloud Storage.
+- **CI/CD Integration:** Adapt the tool to work with CI/CD pipelines.
 - **Parallel Parsing:** Speed up processing by parsing multiple DAGs simultaneously.
 - **Support .airflowignore:** Ignore files and directories specified in the ```.airflowignore``` file.
 
