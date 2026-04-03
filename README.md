@@ -1,4 +1,8 @@
 # Airflow Dag Parse Benchmarking
+[![PyPI version](https://img.shields.io/pypi/v/airflow-parse-bench.svg)](https://pypi.org/project/airflow-parse-bench/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/airflow-parse-bench)
+[![Airflow](https://img.shields.io/badge/Airflow-2.x-red.svg)](https://airflow.apache.org/)
 
 **Stop creating bad DAGs!**
 
